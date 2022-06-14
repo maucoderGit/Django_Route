@@ -1,74 +1,101 @@
+from typing import Optional
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
+from django.views import generic
 
 from.models import Choice, Question
 
 # Create your views here.
 
-def index(request: HttpResponse):
+#def index(request: HttpResponse):
+#    """
+#    Index Function view.
+#
+#    Get all polls
+#
+#    Parameters:
+#    - Request: Request
+#
+#    Returns:
+#    - Render response with:
+#        - HttpResponse.
+#        - Url
+#        - Questions: Dict[Object]
+#    """
+#    lattest_question_list = Question.objects.all() 
+#    return render(request, 'polls/index.html', {
+#        'lattest_question_list': lattest_question_list,
+#    })
+
+
+#def detail(request: HttpResponse, question_id: int):
+#    """
+#    Polls details
+#
+#    Get a question by id
+#
+#    Args:
+#    - request: Request
+#    - question_id: int
+#
+#    Returns:
+#    - Render response with:
+#       - Request.
+#        - Url
+#        - Questions: Dict[id]
+#    """
+#    question: Question | None = get_object_or_404(Question, pk=question_id)
+#    
+#    return render(request,'polls/detail.html', context={
+#        'question': question
+#   })
+
+
+#def results(request: HttpResponse, question_id: int):
+#    """
+#    Results
+#
+#    Get questions results
+#
+#    Args:
+#    - request: HttpResponse
+#    - question_id: int
+#
+#    Returns:
+#    - httpResponse:
+#        - redirect: polls/results.html
+#        - context: dict[str: Question]
+#    """
+#    question = get_object_or_404(Question, pk=question_id)
+#    return render(request, 'polls/results.html', context={
+#        'question': question
+#    })
+
+class IndexView(generic.ListView):
     """
-    Index Function view.
+    Class IndexView
 
-    Get all polls
-
-    Parameters:
-    - Request: Request
-
-    Returns:
-    - Render response with:
-        - HttpResponse.
-        - Url
-        - Questions: Dict[Object]
+    Attributes:
+    - templeate_name: str = is a path to the template name
+    - context_object_name: str = context paramter
     """
-    lattest_question_list = Question.objects.all() 
-    return render(request, 'polls/index.html', {
-        'lattest_question_list': lattest_question_list,
-    })
+
+    template_name: str = 'polls/index.html'
+    context_object_name: str = 'lattest_question_list'
+
+    def get_queryset(self):
+        """Return the last five published question"""
+        return Question.objects.order_by('-pub_date')[:5]
 
 
-def detail(request: HttpResponse, question_id: int):
-    """
-    Polls details
-
-    Get a question by id
-
-    Args:
-    - request: Request
-    - question_id: int
-
-    Returns:
-    - - Render response with:
-        - Request.
-        - Url
-        - Questions: Dict[id]
-    """
-    question: Question | None = get_object_or_404(Question, pk=question_id)
-    
-    return render(request,'polls/detail.html', context={
-        'question': question
-    })
+class DetailView(generic.DetailView):
+    model: Question = Question
+    template_name: str = 'polls/detail.html'
 
 
-def results(request: HttpResponse, question_id: int):
-    """
-    Results
-
-    Get questions results
-
-    Args:
-    - request: HttpResponse
-    - question_id: int
-
-    Returns:
-    - httpResponse:
-        - redirect: polls/results.html
-        - context: dict[str: Question]
-    """
-    question = get_object_or_404(Question, pk=question_id)
-    return render(request, 'polls/results.html', context={
-        'question': question
-    })
+class ResultView(DetailView):
+    template_name: str = 'polls/results.html'
 
 
 def vote(request: HttpResponse, question_id: int):
