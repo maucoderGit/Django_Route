@@ -18,13 +18,13 @@ def create_question(question_text: str, days: float) -> Question:
     """
     time = timezone.now() + datetime.timedelta(days=days)
     question = Question(question_text=question_text, pub_date=time)
-
-    # Create choices
-    choice1 = Choice(question=question, choice_text="Choice 1", votes=0)
-    choice2 = Choice(question=question, choice_text="Choice 2", votes=0)
-    # Save questions
-    question.save(choices=(choice1, choice2))
     
+    # Save questions for possible errors
+    question.save()
+    # Create choices
+    Choice(question=question, choice_text="Choice 1", votes=0).save()
+    Choice(question=question, choice_text="Choice 2", votes=0).save()
+    # Return question
     return question
 
 class QuestionModelTests(TestCase):
@@ -34,11 +34,13 @@ class QuestionModelTests(TestCase):
         If a question object is created must have almost one(1) choice or more.
         """
         question = Question(question_text="Question without choices", pub_date=timezone.now())
+        question.save()
         
+        url = reverse('polls:detail', args=(question.id,))
         # This function validate if a error is raised when we save a question without choices
         with self.assertRaises(forms.ValidationError):
-            question.save()
-
+            response = self.client.get(url)
+        
     def test_was_published_recently_with_old_question(self):
         """
         was_published_recently returns False for a question whose pub_date is greatter
@@ -155,7 +157,7 @@ class QuestionDetailViewTests(TestCase):
 
 class QuestionResultsViewTests(TestCase):
     
-    def test_results_question_no_questions(self):
+    def test_results_without_questions(self):
         """
         If the question doesn't exist the view must response with a 404 status code error
         """

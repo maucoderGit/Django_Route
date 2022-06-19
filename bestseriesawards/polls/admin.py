@@ -24,6 +24,10 @@ class ChoicesInline(admin.TabularInline):
 
 class QuestionAdmin(admin.ModelAdmin):
     inlines=(ChoicesInline,)
+    fields = ['pub_date', 'question_text']
+    list_display = ('question_text', 'pub_date', 'was_published_recently')
+    list_filter = ['pub_date']
+    search_fields: list = ['question_text']
 
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
@@ -32,6 +36,17 @@ class QuestionAdmin(admin.ModelAdmin):
         for instance in instances:
             instance.save()
 
+#admin.site.register(Question, QuestionAdmin)
+#admin.site.register(Choice)
+
+# class ChoiceInline(admin.StackedInline):
+#     model = Choice
+#     extra: int = 2
+#     exclude= ['votes']
+
+# class QuestionAdmin(admin.ModelAdmin):
+#     fields = ['pub_date', 'question_text']
+#     inlines = [ChoiceInline]
+
 
 admin.site.register(Question, QuestionAdmin)
-#admin.site.register(Choice)

@@ -1,7 +1,7 @@
 import datetime
 from django.db import models
-from django import forms
 from django.utils import timezone
+from django.contrib import admin
 
 # models
 
@@ -12,17 +12,21 @@ class Question(models.Model):
     def __str__(self) -> str:
         return self.question_text
 
-    def save(self, *args, **kwargs):
-        choices = kwargs.get('choices')
-        if choices and len(choices) >= 2:
-            kwargs.pop('choices')
-            super().save(*args, **kwargs)     
-            for choice in choices:
-                choice.question = self
-                choice.save()
-        else:
-            raise forms.ValidationError("Must have 2 or more choices")
-
+#    def save(self, *args, **kwargs):
+#        choices = kwargs.get('choices')
+#        if choices and len(choices) >= 2:
+#            kwargs.pop('choices')
+#            super().save(*args, **kwargs)     
+#            for choice in choices:
+#                choice.question = self
+#                choice.save()
+#        else:
+#            raise forms.ValidationError("Must have 2 or more choices")
+    @admin.display(
+        boolean=True,
+        ordering='pub_date',
+        description='Published recently?'
+    )    
     def was_published_recently(self) -> bool:
         """
         Validate if a question was published recently.

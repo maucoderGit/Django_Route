@@ -1,4 +1,5 @@
 from typing import Optional
+from django import forms
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
@@ -98,7 +99,12 @@ class DetailView(generic.DetailView):
         """
         Excludes any question that aren't published yet
         """
-        return Question.objects.filter(pub_date__lte=timezone.now())
+        query_set = Question.objects.filter(pub_date__lte=timezone.now())
+        
+        for question in query_set:
+            if len(question.choice_set.all()) <= 1:
+                raise forms.ValidationError('At least one choice required.')
+        return query_set
 
 
 class ResultView(DetailView):
